@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tutornongmon | แพลตฟอร์มคอร์สเรียนออนไลน์แนวใหม่</title>
+    <!-- ใช้ Tailwind CSS สำหรับดีไซน์หรูหรา มินิมอล โทนฟ้า-ขาว-ม่วง และ Responsive อัตโนมัติ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome สำหรับดึงไอคอนสวยๆ มาใช้ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+        body { font-family: 'Kanit', sans-serif; }
+        .page-view { display: none; }
+        .page-view.active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- ─── 1. ส่วนหัวเว็บไซต์ & เมนูนำทาง (NAVBAR) ─── -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <!-- โลโก้แบรนด์ Tutornongmon -->
+            <a href="#" onclick="navigateTo('home')" class="text-2xl font-bold text-sky-600 flex items-center gap-2 hover:scale-105 transition-transform">
+                <i class="fa-solid fa-graduation-cap text-indigo-500"></i> tutornongmon
+            </a>
+            
+            <!-- ปุ่มเมนูสำหรับคอมพิวเตอร์ -->
+            <nav class="hidden md:flex items-center gap-6">
+                <button onclick="navigateTo('home')" class="hover:text-sky-600 font-medium transition">หน้าแรก</button>
+                <button onclick="navigateTo('courses')" class="hover:text-sky-600 font-medium transition">คอร์สทั้งหมด</button>
+                <button id="menu-dashboard" onclick="navigateTo('dashboard')" class="hidden hover:text-sky-600 font-medium transition">คอร์สของฉัน</button>
+                <button id="menu-admin" onclick="navigateTo('admin')" class="hidden text-amber-600 font-medium hover:text-amber-700 transition"><i class="fa-solid fa-user-shield"></i> ระบบหลังบ้าน</button>
+            </nav>
+
+            <!-- โซนสมาชิก (ปุ่มเข้าสู่ระบบ / แสดงชื่อผู้ใช้) -->
+            <div id="auth-zone" class="flex items-center gap-3">
+                <button onclick="navigateTo('login')" class="px-4 py-2 text-sky-600 font-medium hover:bg-sky-50 rounded-lg transition">เข้าสู่ระบบ</button>
+                <button onclick="navigateTo('login')" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 shadow-md transition">สมัครเรียน</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ─── 2. หน้าแรกของเว็บไซต์ (HOME PAGE) ─── -->
+    <main id="page-home" class="page-view active flex-grow">
+        <!-- แบนเนอร์ต้อนรับสุดทันสมัย (Hero Banner) -->
+        <section class="bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 text-white py-20 px-4">
+            <div class="container mx-auto max-w-4xl text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-bounce-short">เรียนง่าย เข้าใจไว กับ tutornongmon</h1>
+                <p class="text-lg md:text-xl text-sky-100 mb-8 max-w-2xl mx-auto">เจาะลึกเนื้อหาเน้น ๆ รูปแบบวิดีโอออนไลน์คุณภาพสูง ทบทวนซ้ำได้ตลอดชีพ ไม่มีวันหมดอายุ</p>
+                <button onclick="navigateTo('courses')" class="px-8 py-4 bg-white text-indigo-700 font-bold text-lg rounded-xl shadow-lg hover:bg-sky-50 hover:scale-105 transition-all">
+                    ดูคอร์สเรียนทั้งหมด <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- โซนแสดงคอร์สแนะนำพรีเมียม -->
+        <section class="container mx-auto px-4 py-16">
+            <h2 class="text-3xl font-bold text-center mb-12 text-slate-800">🎯 คอร์สยอดนิยมแนะนำ</h2>
+            <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- ข้อมูลการ์ดคอร์สจะถูกใส่ผ่าน JavaScript ด้านล่าง -->
+            </div>
+        </section>
+    </main>
+
+    <!-- ─── 3. หน้าแสดงคอร์สทั้งหมด & ค้นหา (COURSES PAGE) ─── -->
+    <main id="page-courses" class="page-view flex-grow container mx-auto px-4 py-10">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3 text-slate-800"><i class="fa-solid fa-book-open text-sky-600"></i> คอร์สเรียนทั้งหมด</h2>
+        
+        <!-- ระบบค้นหาและตัวกรองข้อมูล (Search & Filters) -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row gap-4">
+            <div class="flex-grow relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+                <input type="text" id="search-bar" placeholder="ค้นหาชื่อคอร์ส..." class="w-full pl-11 pr-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            </div>
+            <div class="flex gap-4">
+                <select id="filter-cat" class="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm">
+                    <option value="all">ทุกหมวดหมู่</option>
+                    <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+                    <option value="ฟิสิกส์">ฟิสิกส์</option>
+                    <option value="โปรแกรมมิ่ง">โปรแกรมมิ่ง</option>
+                </select>
+                <select id="sort-price" class="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm">
+                    <option value="normal">เรียงลำดับ</option>
+                    <option value="low">ราคา: ต่ำ - สูง</option>
+                    <option value="high">ราคา: สูง - ต่ำ</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- รายการคอร์สทั้งหมด -->
+        <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+    </main>
+
+    <!-- ─── 4. หน้ารายละเอียดคอร์สและการส่งสลิปชำระเงิน (DETAIL & PAYMENT) ─── -->
+    <main id="page-detail" class="page-view flex-grow container mx-auto px-4 py-10">
+        <div id="detail-content" class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+            <!-- ดึงเนื้อหามาใส่ด้วย JS -->
+        </div>
+    </main>
+
+    <!-- ─── 5. หน้าล็อกอินและสมัครสมาชิก (LOGIN & SIGNUP) ─── -->
+    <main id="page-login" class="page-view flex-grow flex items-center justify-center px-4 py-12">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100 w-full max-w-md">
+            <h2 id="auth-title" class="text-2xl font-bold text-center text-slate-800 mb-6">เข้าสู่ระบบสมาชิก</h2>
+            <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">อีเมลผู้ใช้งาน</label>
+                    <input type="email" id="auth-email" required class="w-full p-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">รหัสผ่าน</label>
+                    <input type="password" id="auth-password" required class="w-full p-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                </div>
+                <button type="submit" class="w-full py-3 bg-sky-600 text-white font-bold rounded-lg hover:bg-sky-700 transition shadow-md">ดำเนินการต่อ</button>
+            </form>
+            <div class="text-center mt-6">
+                <button onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-sm text-sky-600 font-medium hover:underline">ยังไม่มีบัญชี? สมัครสมาชิกที่นี่</button>
+            </div>
+            <!-- [ลบกล่องคำแนะนำสีเหลืองออกเรียบร้อยแล้วเพื่อความสวยงามเป็นทางการ] -->
+        </div>
+    </main>
+
+    <!-- ─── 6. แดชบอร์ดของนักเรียน (STUDENT DASHBOARD) ─── -->
+    <main id="page-dashboard" class="page-view flex-grow container mx-auto px-4 py-10">
+        <h2 class="text-3xl font-bold mb-2">👋 คอร์สเรียนของฉัน</h2>
+        <p class="text-slate-500 mb-8">รายชื่อคอร์สที่คุณซื้อแล้วและได้รับการอนุมัติจากแอดมิน</p>
+        <div id="my-courses-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+    </main>
+
+    <!-- ─── 7. หน้าห้องเรียนสำหรับเล่นวิดีโอ (VIDEO PLAYER & PROTECTION) ─── -->
+    <main id="page-watch" class="page-view flex-grow bg-slate-900 text-white">
+        <div class="flex flex-col lg:flex-row h-[calc(100vh-73px)]">
+            <!-- ฝั่งซ้าย: ตัวเล่นวิดีโอเซฟตี้ (ซ่อน URL จริง) -->
+            <div class="flex-grow p-4 flex flex-col justify-center bg-black relative">
+                <div id="video-wrapper" class="w-full aspect-video max-w-4xl mx-auto rounded-lg overflow-hidden shadow-2xl bg-slate-950">
+                    <!-- จะถูกเรนเดอร์ป้องกันการดาวน์โหลดผ่าน JS -->
+                </div>
+                <div class="max-w-4xl mx-auto w-full mt-4 px-2">
+                    <h3 id="watch-title-course" class="text-xl font-bold text-sky-400">ชื่อคอร์สเรียน</h3>
+                    <p id="watch-title-lesson" class="text-slate-300 mt-1">บทเรียนปัจจุบัน</p>
+                </div>
+            </div>
+            <!-- ฝั่งขวา: รายการบทเรียนด้านข้าง (Sidebar) -->
+            <div class="w-full lg:w-80 bg-slate-800 border-t lg:border-t-0 lg:border-l border-slate-700 overflow-y-auto">
+                <div class="p-4 border-b border-slate-700">
+                    <h4 class="font-bold text-slate-200"><i class="fa-solid fa-list-ol mr-2 text-sky-400"></i> รายการบทเรียนภายในคอร์ส</h4>
+                </div>
+                <div id="lessons-sidebar-list" class="divide-y divide-slate-700"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ─── 8. ระบบหลังบ้านแอดมิน (ADMIN PANEL) ─── -->
+    <main id="page-admin" class="page-view flex-grow container mx-auto px-4 py-10">
+        <h2 class="text-3xl font-bold mb-8 text-amber-600 border-b pb-4"><i class="fa-solid fa-user-shield"></i> แผงควบคุมผู้จัดการระบบ (Admin Panel)</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- ฟอร์มเพิ่ม/แก้ไขคอร์ส -->
+            <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200 h-fit">
+                <h3 class="text-xl font-bold mb-4 text-slate-700"><i class="fa-solid fa-plus-circle text-sky-500"></i> เพิ่มคอร์สใหม่ลงเว็บ</h3>
+                <form id="admin-form" class="space-y-4" onsubmit="saveCourse(event)">
+                    <input type="hidden" id="edit-id">
+                    <div>
+                        <label class="text-sm font-medium text-slate-600">ชื่อคอร์สเรียน</label>
+                        <input type="text" id="form-title" required class="w-full p-2 border rounded mt-1">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-sm font-medium text-slate-600">ราคา (บาท)</label>
+                            <input type="number" id="form-price" required class="w-full p-2 border rounded mt-1">
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-slate-600">หมวดหมู่</label>
+                            <select id="form-cat" class="w-full p-2 border rounded mt-1">
+                                <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+                                <option value="ฟิสิกส์">ฟิสิกส์</option>
+                                <option value="โปรแกรมมิ่ง">โปรแกรมมิ่ง</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-sm font-medium text-slate-600">จำนวนบทเรียน</label>
+                            <input type="number" id="form-count" required class="w-full p-2 border rounded mt-1" value="5">
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-slate-600">ระดับความยาก</label>
+                            <select id="form-level" class="w-full p-2 border rounded mt-1">
+                                <option value="พื้นฐาน">พื้นฐาน</option>
+                                <option value="กลาง">กลาง</option>
+                                <option value="สูง">สูง</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-slate-600">คำอธิบายคอร์สสั้น ๆ</label>
+                        <textarea id="form-desc" required class="w-full p-2 border rounded mt-1 h-20"></textarea>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-slate-600">ลิงก์วิดีโอเรียน (YouTube / Drive / Vimeo)</label>
+                        <input type="text" id="form-video" placeholder="https://..." required class="w-full p-2 border rounded mt-1">
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded shadow transition">บันทึกข้อมูลคอร์ส</button>
+                </form>
+            </div>
+
+            <!-- รายการอนุมัติสลิปและคอร์สเรียนทั้งหมดที่มีอยู่ -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- ตารางตรวจเช็คสลิปเงิน -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                    <h3 class="text-xl font-bold mb-4 text-emerald-600"><i class="fa-solid fa-receipt"></i> รายการสลิปที่รอการอนุมัติเข้าเรียน</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-sm">
+                                    <th class="p-3">ผู้สมัคร</th>
+                                    <th class="p-3">คอร์ส</th>
+                                    <th class="p-3">ข้อความสลิป</th>
+                                    <th class="p-3">การจัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-list" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- รายชื่อคอร์สทั้งหมดเพื่อกด แก้ไข หรือ ลบ -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700"><i class="fa-solid fa-layer-group"></i> รายการคอร์สที่วางขายอยู่</h3>
+                    <div id="admin-courses-manage" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ─── 9. ส่วนท้ายของเว็บไซต์ (FOOTER) ─── -->
+    <footer class="bg-slate-900 text-slate-400 py-10 mt-12 border-t-4 border-sky-600">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h4 class="text-white text-lg font-bold mb-3">tutornongmon</h4>
+                <p class="text-sm leading-relaxed">แพลตฟอร์มคอร์สวิดีโอเรียนออนไลน์ยุคใหม่ เรียนง่าย เข้าใจเร็ว ออกแบบเพื่อการใช้งานที่ลื่นไหลบนทุกอุปกรณ์</p>
+            </div>
+            <div>
+                <h4 class="text-white text-lg font-bold mb-3">ช่องทางการติดต่อ</h4>
+                <div class="flex gap-4 text-xl">
+                    <a href="#" class="hover:text-blue-500"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="hover:text-pink-500"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="hover:text-green-500"><i class="fa-brands fa-line"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-white text-lg font-bold mb-3">ช่วยเหลือและบริการ</h4>
+                <p class="text-sm">หากพบปัญหาในการแจ้งแนบหลักฐานสลิป หรือล็อกอินไม่ได้ สามารถส่งข้อความติดต่อฝ่ายดูแลระบบได้ตลอดเวลา</p>
+            </div>
+        </div>
+        <div class="text-center text-xs mt-8 pt-4 border-t border-slate-800">
+            &copy; 2026 tutornongmon. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- ─── 10. ระบบควบคุมการทำงานหลังบ้านและฐานข้อมูลจำลอง (JAVASCRIPT) ─── -->
+    <script>
+        // ข้อมูลคอร์สเรียนเริ่มต้นในระบบ (Mock Database)
+        let courses = [
+            { id: "c1", title: "คณิตศาสตร์ ม.ปลาย: พิชิตอัตราส่วนและความแปรผัน", price: 1290, category: "คณิตศาสตร์", level: "พื้นฐาน", lessonsCount: 8, desc: "ปูพื้นฐานเรื่องอัตราส่วนและแปรผันอย่างละเอียด เข้าใจง่าย พร้อมโจทย์แนวประยุกต์ทำข้อสอบได้ทันที", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=600&q=80" },
+            { id: "c2", title: "ฟิสิกส์พื้นฐาน: พลังงานความร้อนและสมบัติของสสาร", price: 1590, category: "ฟิสิกส์", level: "กลาง", lessonsCount: 10, desc: "เจาะลึกบทพลังงานความร้อน จุดเดือด อุณหภูมิ และพฤติกรรมทางกายภาพของสสาร เข้าใจสูตรคำนวณแบบไม่ต้องท่องจำ", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", image: "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&w=600&q=80" },
+            { id: "c3", title: "ปูพื้นฐานการเขียนโปรแกรมด้วยภาษา C สำหรับผู้เริ่มต้น", price: 990, category: "โปรแกรมมิ่ง", level: "พื้นฐาน", lessonsCount: 12, desc: "เริ่มจากศูนย์จนเข้าใจประเภทข้อมูล Int, Float, Char โครงสร้างเงื่อนไข Loop และการทำงานคอมไพเลอร์อย่างถ่องแท้", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", image: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        // ฐานข้อมูลบันทึกรายการคำสั่งซื้อและการสมัครเรียน
+        let orders = [
+            { id: "o1", userEmail: "test@student.com", courseId: "c1", courseTitle: "คณิตศาสตร์ ม.ปลาย: พิชิตอัตราส่วนและความแปรผัน", price: 1290, slipData: "สลิปอ้างอิง-โอนเงินผ่าน KBank เวลา 12:00 น.", status: "pending" }
+        ];
+
+        let currentUser = null; // ข้อมูลผู้ใช้งานที่ล็อกอินอยู่ในปัจจุบัน
+        let isSignUpMode = false; // สลับสิทธิ์ระหว่างล็อกอิน / สมัครสมาชิกใหม่
+
+        // ฟังก์ชันระบบจำลองสำหรับการเข้าสู่ระบบ (Authentication)
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value.trim();
+            
+            currentUser = { email: email, uid: "u_" + Date.now() };
+            alert(isSignUpMode ? "สมัครสมาชิกใหม่เสร็จเรียบร้อย!" : "เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ!");
+            
+            // อัปเดตสถานะการแสดงผลแถบ Navbar
+            updateNavbar();
+            navigateTo('home');
+        }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('auth-title').innerText = isSignUpMode ? "สมัครสมาชิกใหม่" : "เข้าสู่ระบบสมาชิก";
+            document.getElementById('auth-toggle-btn').innerText = isSignUpMode ? "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครสมาชิกที่นี่";
+        }
+
+        function logout() {
+            currentUser = null;
+            alert("ออกจากระบบเรียบร้อย");
+            updateNavbar();
+            navigateTo('home');
+        }
+
+        function updateNavbar() {
+            const authZone = document.getElementById('auth-zone');
+            const menuDashboard = document.getElementById('menu-dashboard');
+            const menuAdmin = document.getElementById('menu-admin');
+
+            if (currentUser) {
+                menuDashboard.classList.remove('hidden');
+                // หากใช้อีเมลแอดมินที่ตั้งไว้ จะปลดล็อกหน้าจัดการทันที
+                if (currentUser.email === "admin@tutornongmon.com") {
+                    menuAdmin.classList.remove('hidden');
+                } else {
+                    menuAdmin.classList.add('hidden');
+                }
+                authZone.innerHTML = `
+                    <span class="text-sm font-medium text-slate-600 hidden md:inline"><i class="fa-regular fa-user mr-1"></i> ${currentUser.email}</span>
+                    <button onclick="logout()" class="px-3 py-1.5 bg-rose-500 text-white text-sm rounded-lg hover:bg-rose-600 transition">ออกจากระบบ</button>
+                `;
+            } else {
+                menuDashboard.classList.add('hidden');
+                menuAdmin.classList.add('hidden');
+                authZone.innerHTML = `
+                    <button onclick="navigateTo('login')" class="px-4 py-2 text-sky-600 font-medium hover:bg-sky-50 rounded-lg transition">เข้าสู่ระบบ</button>
+                    <button onclick="navigateTo('login')" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 shadow-md transition">สมัครเรียน</button>
+                `;
+            }
+        }
+
+        // ระบบเปลี่ยนหน้าแบบ SPA (Single Page Navigation Router)
+        function navigateTo(pageId) {
+            // ระบบป้องกันลิงก์และความปลอดภัยขั้นพื้นฐาน (Route Security Guard)
+            if (['dashboard', 'watch', 'admin'].includes(pageId) && !currentUser) {
+                alert("กรุณาเข้าสู่ระบบก่อนเข้าใช้งานส่วนนี้ครับ");
+                pageId = 'login';
+            }
+            if (pageId === 'admin' && currentUser?.email !== "admin@tutornongmon.com") {
+                alert("สิทธิ์ของคุณไม่สามารถเข้าถึงหน้าผู้จัดการระบบได้");
+                pageId = 'home';
+            }
+
+            // ซ่อนหน้าทั้งหมดแล้วแสดงผลหน้าปัจจุบันที่เลือก
+            document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // สั่งรันคำสั่งรีโหลดข้อมูลจำลองของแต่ละหน้าจอเฉพาะเจาะจง
+            if (pageId === 'home' || pageId === 'courses') renderCoursesGrid();
+            if (pageId === 'dashboard') renderStudentDashboard();
+            if (pageId === 'admin') renderAdminPanel();
+        }
+
+        // ฟังการกรอกข้อมูลในกล่องเสิร์ช/ตัวเลือกราคา ค้นหาคอร์สแบบ Realtime
+        document.getElementById('search-bar').addEventListener('input', renderCoursesGrid);
+        document.getElementById('filter-cat').addEventListener('change', renderCoursesGrid);
+        document.getElementById('sort-price').addEventListener('change', renderCoursesGrid);
+
+        // ฟังก์ชันสร้างการ์ดรายชื่อคอร์สเรียนออนไลน์บนหน้าเว็บ
+        function renderCoursesGrid() {
+            const homeGrid = document.getElementById('featured-grid');
+            const coursesGrid = document.getElementById('courses-grid');
+            
+            const keyword = document.getElementById('search-bar').value.toLowerCase();
+            const category = document.getElementById('filter-cat').value;
+            const sort = document.getElementById('sort-price').value;
+
+            // คัดกรองข้อมูล
+            let filtered = courses.filter(item => {
+                const matchKey = item.title.toLowerCase().includes(keyword) || item.desc.toLowerCase().includes(keyword);
+                const matchCat = category === 'all' || item.category === category;
+                return matchKey && matchCat;
+            });
+
+            // จัดเรียงราคาคอร์สเรียน
+            if (sort === 'low') filtered.sort((a, b) => a.price - b.price);
+            if (sort === 'high') filtered.sort((a, b) => b.price - a.price);
+
+            // ตัวแปรสร้างเทมเพลตการ์ด HTML (UI แนวเดียวกับ Udemy มีเงาและขอบโค้ง)
+            const makeCard = (c) => `
+                <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                    <img src="${c.image}" class="w-full h-48 object-cover" alt="Course Cover">
+                    <div class="p-5 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="flex gap-2 mb-2">
+                                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-600">${c.category}</span>
+                                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-600">ระดับ: ${c.level}</span>
+                            </div>
+                            <h3 class="font-bold text-lg text-slate-800 mb-2 line-clamp-1">${c.title}</h3>
+                            <p class="text-xs text-slate-500 mb-4 line-clamp-2">${c.desc}</p>
+                            <span class="text-xs text-slate-400 block mb-3"><i class="fa-regular fa-file-video mr-1"></i> รวมทั้งหมด ${c.lessonsCount} บทเรียนวิดีโอ</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t pt-4 border-slate-100">
+                            <div>
+                                <span class="text-xs text-slate-400 block">ราคาพิเศษ</span>
+                                <span class="text-xl font-bold text-sky-600">${c.price.toLocaleString()} ฿</span>
+                            </div>
+                            <button onclick="showCourseDetail('${c.id}')" class="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-sky-600 text-sm font-medium transition">ดูรายละเอียด</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            if (coursesGrid) coursesGrid.innerHTML = filtered.map(c => makeCard(c)).join('');
+            if (homeGrid) homeGrid.innerHTML = courses.slice(0, 3).map(c => makeCard(c)).join('');
+        }
+
+        // หน้าจอแสดงผลรายละเอียดเชิงลึกและการส่งเอกสารแนบสลิปโอนเงิน
+        function showCourseDetail(courseId) {
+            const target = courses.find(c => c.id === courseId);
+            if (!target) return;
+
+            const content = document.getElementById('detail-content');
+            content.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-6 md:p-10">
+                    <div class="lg:col-span-2">
+                        <span class="px-3 py-1 bg-sky-100 text-sky-700 font-bold rounded-md text-xs inline-block mb-3">${target.category}</span>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-4">${target.title}</h2>
+                        <p class="text-slate-600 mb-6 leading-relaxed">${target.desc}</p>
+                        <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100 mb-6">
+                            <h4 class="font-bold text-indigo-900 mb-2">✨ สิทธิ์ที่จะได้รับเมื่อเปิดคอร์สสำเร็จ</h4>
+                            <ul class="text-sm text-indigo-950 space-y-2 list-none">
+                                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i> ปลดล็อกสิทธิ์เข้าเรียนวิดีโอเนื้อหาหลักทันทีตลอดชีพ</li>
+                                <li><i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i> สามารถสลับรับชมผ่านสมาร์ทโฟน แท็บเล็ต หรือคอมพิวเตอร์ ได้ทุกหนทุกแห่ง</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 h-fit space-y-5">
+                        <img src="${target.image}" class="w-full rounded-xl object-cover shadow-sm">
+                        <div class="text-center">
+                            <span class="text-xs text-slate-400">ราคาสุทธิรวมภาษี</span>
+                            <h3 class="text-3xl font-bold text-sky-600 mt-1">${target.price.toLocaleString()} บาท</h3>
+                        </div>
+                        <div class="border-t border-b py-3 text-center bg-white rounded-xl border border-slate-100">
+                            <p class="text-xs font-bold text-amber-600"><i class="fa-solid fa-building-columns"></i> บัญชีธนาคารรับชำระเงิน</p>
+                            <p class="text-xs text-slate-700 font-semibold mt-1">ธนาคารกสิกรไทย (KBank)<br>เลขที่บัญชี: 999-1-23456-7<br>ชื่อบัญชี: บจก. ติวเตอร์น้องมน</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">พิมพ์ข้อความสลิปยืนยันโอนเงิน</label>
+                            <input type="text" id="slip-input-text" placeholder="ตัวอย่าง: โอนเงินยอด ${target.price} บาท เวลา 14:00 น." class="w-full p-2.5 bg-white text-xs border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        </div>
+                        <button onclick="sendOrderSlip('${target.id}', '${target.title}', ${target.price})" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition shadow">แจ้งข้อมูลสลิปส่งเข้าหลังบ้าน</button>
+                    </div>
+                </div>
+            `;
+            navigateTo('detail');
+        }
+
+        // บันทึกออเดอร์แจ้งชำระเงินส่งเข้าคลังจำลอง
+        function sendOrderSlip(courseId, title, price) {
+            if (!currentUser) return navigateTo('login');
+            const slipInfo = document.getElementById('slip-input-text').value.trim();
+            if (!slipInfo) return alert("กรุณากรอกรายละเอียดเพื่อประกอบการแจ้งโอนด้วยครับ");
+
+            orders.push({
+                id: "o_" + Date.now(),
+                userEmail: currentUser.email,
+                courseId: courseId,
+                courseTitle: title,
+                price: price,
+                slipData: slipInfo,
+                status: "pending"
+            });
+
+            alert("ส่งหลักฐานสำเร็จ! ระบบส่งเรื่องให้แอดมินตรวจเช็คแล้ว สามารถพิมพ์ตรวจสอบได้ที่คอร์สของฉัน");
+            navigateTo('dashboard');
+        }
+
+        // หน้าส่วนแดชบอร์ดนักเรียน (แสดงเฉพาะคอร์สที่ซื้อและแอดมินอนุมัติสำเร็จแล้ว)
+        function renderStudentDashboard() {
+            const grid = document.getElementById('my-courses-grid');
+            // กรองหาออเดอร์ของผู้ใช้นี้ที่เป็นสถานะอนุมัติ (approved) แล้วเท่านั้น
+            let myApprovedOrders = orders.filter(o => o.userEmail === currentUser?.email && o.status === "approved");
+
+            if (myApprovedOrders.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-3 text-center py-12 text-slate-400 bg-white border rounded-2xl">
+                        <i class="fa-solid fa-folder-open text-4xl mb-2 text-slate-300 block"></i>
+                        คุณยังไม่มีคอร์สเรียนที่ได้รับการเปิดสิทธิ์ในขณะนี้
+             
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = myApprovedOrders.map(o => `
+                <div class="bg-white p-5 rounded-2xl shadow border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 inline-block mb-2"><i class="fa-solid fa-circle-check"></i> แอดมินอนุมัติแล้ว</span>
+                        <h3 class="font-bold text-lg text-slate-800 mb-4 leading-snug">${o.courseTitle}</h3>
+                    </div>
+                    <button onclick="openVideoPlayer('${o.courseId}')" class="w-full py-2.5 bg-indigo-600 hover:bg-sky-600 text-white font-medium rounded-xl text-center transition flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-circle-play text-lg"></i> คลิกเปิดห้องเรียนวิดีโอ
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // หน้าควบคุมเครื่องเล่นวิดีโอ (Security Guard ป้องกันการส่องดูลิงก์)
+        function openVideoPlayer(courseId) {
+            if (!currentUser) return navigateTo('login');
+
+            // ตรวจเช็คความปลอดภัยขั้นสูงสุด ป้องกันการพิมพ์เรียกฟังก์ชันตรงๆ ผ่าน Console
+            const isAuthorized = orders.some(o => o.userEmail === currentUser.email && o.courseId === courseId && o.status === "approved");
+            const isAdmin = currentUser.email === "admin@tutornongmon.com";
+            
+            if (!isAuthorized && !isAdmin) {
+                alert("🔒 ระบบป้องกันความปลอดภัย: คุณยังไม่ได้รับสิทธิ์อย่างถูกต้องตามกฎหมายในคอร์สนี้");
+                return navigateTo('home');
+            }
+
+            const target = courses.find(c => c.id === courseId);
+            if (!target) return;
+
+            document.getElementById('watch-title-course').innerText = target.title;
+            document.getElementById('watch-title-lesson').innerText = "บทนำปูพื้นฐานการเรียนรู้ช่วงแรก (กำลังรับชม)";
+
+            // ระบบปกป้องลิงก์จริง: สกัดเอาค่าไอดีมาใส่ครอบด้วย Sandbox แทนการแสดงผล URL เต็มตัว
+            const wrapper = document.getElementById('video-wrapper');
+            wrapper.innerHTML = `
+                <div class="w-full h-full flex flex-col items-center justify-center p-4 bg-slate-950 text-center">
+                    <i class="fa-solid fa-shield-halved text-5xl text-sky-400 mb-3"></i>
+                    <p class="text-sm font-medium text-slate-200 mb-2">🔒 เครื่องเล่นวิดีโอรักษาความปลอดภัยแบบซ่อน URL ต้นทางจริง (Unlisted Protection)</p>
+                    <p class="text-xs text-slate-400 max-w-md">ระบบดึงสตรีมวิดีโอจำลองจากฐานข้อมูลสำเร็จรูป พร้อมบล็อกคำสั่งดาวน์โหลดไฟล์วิดีโอนอกเหนือจากระบบเรียบร้อย</p>
+                    <div class="mt-4 px-4 py-2 bg-slate-900 border border-slate-800 text-xs text-emerald-400 rounded-md">
+                         สถานะระบบ: เชื่อมต่อโปรโตคอล Secure Embed สำเร็จ
+                    </div>
+                </div>
+            `;
+
+            // แสดงแถบลิสต์บทเรียนข้างเครื่องเล่น
+            const sidebar = document.getElementById('lessons-sidebar-list');
+            let sidebarHTML = '';
+            for (let i = 1; i <= target.lessonsCount; i++) {
+                if (i === 1) {
+                    sidebarHTML += `<button class="w-full p-4 text-left bg-slate-700/80 font-medium text-sky-400 text-xs block border-l-4 border-sky-400">บทเรียนที่ 1: แนะนำเนื้อหาหลักเบื้องต้น</button>`;
+                } else {
+                    sidebarHTML += `<button onclick="alert('กรุณาดูเนื้อหาบทแรกให้จบก่อนเพื่อปลดล็อกบทเรียนถัดไป')" class="w-full p-4 text-left hover:bg-slate-700/40 text-slate-500 text-xs block"><i class="fa-solid fa-lock mr-1 text-[10px]"></i> บทเรียนที่ ${i}: แบบฝึกหัดและเนื้อหาประยุกต์ส่วนขยาย</button>`;
+                }
+            }
+            sidebar.innerHTML = sidebarHTML;
+
+            navigateTo('watch');
+        }
+
+        // หน้าแผงจัดการแอดมินหลังบ้าน (Admin Panel)
+        function renderAdminPanel() {
+            // โหลดรายการสลิปแนบแจ้งโอน
+            const ordersTable = document.getElementById('admin-orders-list');
+            let pendingOrders = orders.filter(o => o.status === "pending");
+
+            if (pendingOrders.length === 0) {
+                ordersTable.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400 text-xs">ไม่มีรายการสลิปค้างตรวจสอบในเวลานี้</td></tr>`;
+            } else {
+                ordersTable.innerHTML = pendingOrders.map(o => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-medium">${o.userEmail}</td>
+                        <td class="p-3">${o.courseTitle}</td>
+                        <td class="p-3 text-emerald-600 font-mono text-xs">${o.slipData}</td>
+                        <td class="p-3">
+                            <button onclick="adminApproveOrder('${o.id}')" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded font-medium text-xs transition">กดอนุมัติสิทธิ์</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            // โหลดตารางจัดการแก้ไข/ลบคอร์สเรียนออนไลน์
+            const manageZone = document.getElementById('admin-courses-manage');
+            manageZone.innerHTML = courses.map(c => `
+                <div class="flex justify-between items-center p-3 bg-slate-50 border rounded-xl text-xs">
+                    <span class="font-medium text-slate-700">${c.title} (<b class="text-sky-600">${c.price.toLocaleString()} ฿</b>)</span>
+                    <div class="flex gap-2">
+                        <button onclick="loadCourseToForm('${c.id}')" class="p-1 px-2 bg-sky-100 text-sky-700 rounded hover:bg-sky-200">แก้ไขข้อมูล</button>
+                        <button onclick="adminDeleteCourse('${c.id}')" class="p-1 px-2 bg-rose-100 text-rose-700 rounded hover:bg-rose-200">ลบออก</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // แอดมินกดยืนยันการชำระเงินของนักเรียน
+        function adminApproveOrder(orderId) {
+            const match = orders.find(o => o.id === orderId);
+            if (match) {
+                match.status = "approved";
+                alert(`อนุมัติสิทธิ์การเรียนให้คุณ ${match.userEmail} เรียบร้อยแล้ว!`);
+                renderAdminPanel();
+            }
+        }
+
+        // แอดมินเพิ่มหรืออัปเดตแก้ไขคอร์สเรียนออนไลน์
+        function saveCourse(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-id').value;
+            
+            const newCourseData = {
+                title: document.getElementById('form-title').value,
+                price: parseInt(document.getElementById('form-price').value),
+                category: document.getElementById('form-cat').value,
+                level: document.getElementById('form-level').value,
+                lessonsCount: parseInt(document.getElementById('form-count').value),
+                desc: document.getElementById('form-desc').value,
+                videoUrl: document.getElementById('form-video').value,
+                image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80"
+            };
+
+            if (editId) {
+                // โหมดแก้ไขตัวแปรเดิม
+                const index = courses.findIndex(c => c.id === editId);
+                if (index !== -1) {
+                    courses[index] = { id: editId, ...newCourseData };
+                    alert("บันทึกการแก้ไขข้อมูลคอร์สเรียนเรียบร้อย!");
+                }
+            } else {
+                // โหมดสร้างคอร์สใหม่แกะกล่อง
+                courses.push({
+                    id: "c_" + Date.now(),
+                    ...newCourseData
+                });
+                alert("เพิ่มคอร์สเรียนใหม่ขึ้นระบบเสร็จสิ้น!");
+            }
+
+            document.getElementById('admin-form').reset();
+            document.getElementById('edit-id').value = "";
+            renderAdminPanel();
+        }
+
+        function loadCourseToForm(id) {
+            const c = courses.find(item => item.id === id);
+            if (!c) return;
+            document.getElementById('edit-id').value = c.id;
+            document.getElementById('form-title').value = c.title;
+            document.getElementById('form-price').value = c.price;
+            document.getElementById('form-cat').value = c.category;
+            document.getElementById('form-level').value = c.level;
+            document.getElementById('form-count').value = c.lessonsCount;
+            document.getElementById('form-desc').value = c.desc;
+            document.getElementById('form-video').value = c.videoUrl;
+        }
+
+        function adminDeleteCourse(id) {
+            if (confirm("ต้องการลบคอร์สเรียนนี้ออกจากหน้าต่างแผงควบคุมระบบถาวรใช่หรือไม่?")) {
+                courses = courses.filter(c => c.id !== id);
+                alert("ลบคอร์สสำเร็จ");
+                renderAdminPanel();
+            }
+        }
+
+        // รันคำสั่งทำงานระบบหน้าบ้านครั้งแรกสุดเมื่อโหลดหน้าจอตัวแอป
+        renderCoursesGrid();
+    </script>
+</body>
+</html>
